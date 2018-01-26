@@ -4,6 +4,7 @@ import json
 import schedule
 from threading import Thread, Event
 import time
+from datetime import datetime
 from json import JSONDecodeError
 import redis
 from src.scheduler.rpc_server import RpcServer
@@ -39,10 +40,13 @@ class Scheduler(RpcServer):
 
         try:
             body = json.loads(body)
+            worker_method = getattr(self, body.get('method'))
             params = body.get('params')
 
-            self.schedule_the_job(params.get('period'), params.get('email'))
-            self.save_to_db(params)
+            result = worker_method(**params)
+
+            # self.schedule_the_job(params.get('period'), params.get('email'))
+            # self.save_to_db(params)
 
         except JSONDecodeError as e:
             err_msg = "Body cannot be decoded. It may not be a valid " \
@@ -54,25 +58,26 @@ class Scheduler(RpcServer):
 
         response = {
             "jsonrpc": "2.0",
-            "id": id
+            "id": params.get('id'),
         }
+        print(err)
 
         if err:
             response['error'] = err
         else:
-            response['result'] = params
-            response['result']['status'] = "success"
+            response['result'] = result
 
         ch.basic_publish(exchange='',
                          routing_key=props.reply_to,
                          properties=pika.BasicProperties(
                              correlation_id=props.correlation_id),
-                         body=str(response))
+                         body=json.dumps(response))
+        print(method.delivery_tag)
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def start_consuming(self):
         """
-        Overrided this method to use on_request callback
+        Overridden to use on_request callback
         Original method in rpc_server.py
 
         """
@@ -80,9 +85,12 @@ class Scheduler(RpcServer):
         self._channel.basic_qos(prefetch_count=1)
         self._consumer_tag = self._channel.basic_consume(
             consumer_callback=self.on_request,
-            queue=self.QUEUE
+            queue=self.QUEUE,
         )
         print("Started consuming...")
+
+    def subscribe(self, **kwargs):
+        pass
 
     def save_to_db(self, params):
         # todo implement
