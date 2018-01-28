@@ -1,8 +1,9 @@
 import falcon
 import json
+import redis
 
 from graceful.serializers import BaseSerializer
-from graceful.fields import StringField, BaseField
+from graceful.fields import StringField, BaseField, IntField
 from graceful.resources.generic import RetrieveAPI, ListCreateAPI
 #from src.rest.rpc_client import RpcClient
 
@@ -28,7 +29,8 @@ class SubscriptionSerializer(BaseSerializer):
                                        allow_null=False)
     period = StringField("Notification period e.g. daily, or weekly",
                          allow_null=False)
-    telegramID = StringField("Telegram ID", allow_null = False)
+    telegramID = IntField("Telegram ID", allow_null=False)
+    repoCount = IntField("Number of suggestions each time", allow_null=False)
 
 
 class SubscriptionList(ListCreateAPI, with_context=True):
@@ -37,12 +39,16 @@ class SubscriptionList(ListCreateAPI, with_context=True):
     def __init__(self):
         #self.rpc_client = rpc_client
         super(SubscriptionList, self).__init__()
+        self.redisClient = redis.Redis()
 
     serializer = SubscriptionSerializer()
 
     def create(self, params, meta, **kwargs):
         validated = kwargs.get('validated')
         print(validated)
+        value = json.dumps(validated)
+        key = "temp:User:" + validated["email"]
+        self.redisClient.set(key, value)
         return validated
         # todo make the rpc call and wait for response
         #resp = self.rpc_client.rpc_call("subscribe", validated)
