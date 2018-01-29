@@ -4,10 +4,11 @@ import redis
 
 try:
     github_token = os.getenv("GITHUB_TOKEN")
+    github_token = 'b1141d703757e42807c5c6bfc314c99041342a5b'
 except KeyError:
     raise Exception("Please set environment variables GITHUB_TOKEN")
 
-github_subs = []
+github_subs = ['vrct','erdemsahin']
 github_api_url = 'https://api.github.com/users/{}/starred'
 github_params = {'access_token':github_token}
 
