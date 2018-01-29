@@ -24,13 +24,11 @@ class JsonField(BaseField):
 
 class SubscriptionSerializer(BaseSerializer):
     #TODO: ADD VALIDATORS
-    email = StringField("Email to send repository reports", allow_null=False)
-    subscriptions = JsonField("List of subscribed github ids",
-                                       allow_null=False)
-    period = StringField("Notification period e.g. daily, or weekly",
-                         allow_null=False)
-    telegramID = IntField("Telegram ID", allow_null=False)
-    repoCount = IntField("Number of suggestions each time", allow_null=False)
+    email = StringField("Email to send repository reports")
+    subscriptions = JsonField("List of subscribed github ids")
+    period = StringField("Notification period e.g. daily, or weekly")
+    telegramID = StringField("Telegram ID")
+    repoCount = IntField("Number of suggestions each time")
 
 
 class SubscriptionList(ListCreateAPI, with_context=True):
