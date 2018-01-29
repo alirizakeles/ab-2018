@@ -22,13 +22,13 @@ def schedleri_ayarla(kullanici_verisi):
 	period = kullanici_verisi['period']
 
 	if period == "daily":
-		schedule.every(1).days.at("10:10").do(workira_is_birak)
+		schedule.every(1).days.at("10:10").do(notifiera_is_birak)
 
 	else if period ==  "weekly":
-		schedule.every(7).days.at("10:10").do(workira_is_birak)
+		schedule.every(7).days.at("10:10").do(notifiera_is_birak)
 
 	else if period == "monthly":
-		schedule.every(30).days.at("10:10").do(workira_is_birak)
+		schedule.every(30).days.at("10:10").do(notifiera_is_birak)
 
 def redise_yazdir(kullanici_verisi):
 	# rabitten okunan veriler, redise kaydediliyor
@@ -51,7 +51,6 @@ def allektamovikmovik():
 		schedule.run_pending()
 		time.sleep(1)
 
-schedule.every(5).minutes.do(workira_is_birak)
 threading.Thread(target=allektamovikmovik).start()
 
 while True:
