@@ -23,6 +23,7 @@ def schedleri_ayarla(kullanici_verisi):
 
 	if period == "daily":
 		schedule.every(1).days.at("10:10").do(notifiera_is_birak)
+		schedule.every(1).days.at("10:10").do(workerlara_startlari_denetlet)
 
 	else if period ==  "weekly":
 		schedule.every(7).days.at("10:10").do(notifiera_is_birak)
@@ -30,9 +31,10 @@ def schedleri_ayarla(kullanici_verisi):
 	else if period == "monthly":
 		schedule.every(30).days.at("10:10").do(notifiera_is_birak)
 
+	
 def redise_yazdir(kullanici_verisi):
 	# rabitten okunan veriler, redise kaydediliyor
-	redis_cli.set(':'.join(["User",kullanici_verisi['email']],json.dumps(kulanici_verisi))
+	redis_cli.set(':'.join(["User",kullanici_verisi['email']]),json.dumps(kulanici_verisi))
 
 def tempi_sil(kullanici_verisi):
 	# rediste bulunan, kullanıcıya ait verilerin bulunduğu datayı redisten siliyor
