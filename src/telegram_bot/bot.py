@@ -29,10 +29,6 @@ try:
 
     # Expected: http://address_to_api/v#/Subscriptions/
     API_URL = os.environ['REST_API_URL']
-
-    # Variables for Redis server:
-    REDIS_SERVER_URL = os.environ['REDIS_SERVER_URL']
-
 except KeyError:
     logger.error("KeyError: Error while getting environment variables. Did you set them correctly?")
     exit(-1)
