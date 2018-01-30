@@ -6,7 +6,10 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, Rege
                           ConversationHandler)
 import requests
 import logging
+<<<<<<< HEAD
 import time
+=======
+>>>>>>> 1ef4b9aaf963ea8afb57097c0baa5e36b4e92ff3
 import redis
 import os
 import re
