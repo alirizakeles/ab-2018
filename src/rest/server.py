@@ -1,15 +1,14 @@
 import falcon
 import json
 import redis
+import pika
 
 from graceful.serializers import BaseSerializer
 from graceful.fields import StringField, BaseField, IntField
 from graceful.resources.generic import RetrieveAPI, ListCreateAPI
-#from src.rest.rpc_client import RpcClient
-
 
 api = application = falcon.API()
-
+QUEUE_NAME = "scheduler_queue"
 
 class JsonField(BaseField):
     """
@@ -35,24 +34,29 @@ class SubscriptionList(ListCreateAPI, with_context=True):
     """
     """
     def __init__(self):
-        #self.rpc_client = rpc_client
         super(SubscriptionList, self).__init__()
-        self.redisClient = redis.Redis()
+        self.redis_client = redis.Redis()
+        connection = pika.BlockingConnection(
+        pika.ConnectionParameters(
+            host='10.21.251.26', 
+            virtual_host='ab18-vhost',
+            credentials=pika.PlainCredentials('ab18-user', 'microservices')))
+    
+        self.channel = connection.channel()
 
+        self.channel.queue_declare(queue=QUEUE_NAME, durable=True)
+    
+        
     serializer = SubscriptionSerializer()
 
     def create(self, params, meta, **kwargs):
         validated = kwargs.get('validated')
         print(validated)
         value = json.dumps(validated)
-        key = "temp:User:" + validated["email"]
-        self.redisClient.set(key, value)
+        key = "temp:User:{}".format(validated["email"])
+        self.redis_client.set(key, value)
+        self.channel.basic_publish(exchange='', routing_key=QUEUE_NAME, body=value)
         return validated
-        # todo make the rpc call and wait for response
-        #resp = self.rpc_client.rpc_call("subscribe", validated)
-        #print(resp)
-        #return resp
 
 
-#rpc_client = RpcClient()
 api.add_route("/v1/subscriptions/", SubscriptionList())
