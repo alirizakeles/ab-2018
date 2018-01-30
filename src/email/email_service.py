@@ -1,9 +1,6 @@
-import json
 import os
 import smtplib
-import time
 
-import redis
 
 '''try:
     email_user_name = os.environ["EMAIL_USER"]
@@ -17,37 +14,27 @@ json.loads(job.decode())
 
 job_queue = "email_queue"'''
 
+EMAIL_USERNAME = os.getenv("EMAIL_USERNAME")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+EMAIL_SMTP_HOST = os.getenv("EMAIL_SMTP_HOST")
+EMAIL_SMTP_PORT = os.getenv("EMAIL_SMTP_PORT")
+
 
 def send_email(receiver, body):
-    email_user_name = "abkurs@sifirbir.xyz"
-    email_user_pass = "cokcokcokgizli"
-
     email_text = """\  
     From: %s  
     To: %s  
     Subject: %s
 
     %s
-    """ % (email_user_name, receiver, "Star reminder", body)
+    """ % (EMAIL_USERNAME, receiver, "Star reminder", body)
 
-    server = smtplib.SMTP('box.sifirbir.xyz', 587)
+    server = smtplib.SMTP(EMAIL_SMTP_HOST, EMAIL_SMTP_PORT)
     server.ehlo()
     server.starttls()
 
-    server.login(user=email_user_name, password=email_user_pass)
-    senderss = server.sendmail(from_addr=email_user_name, to_addrs=receiver, msg=email_text)
-    print (senderss)
+    server.login(user=EMAIL_USERNAME, password=EMAIL_PASSWORD)
+    senderss = server.sendmail(from_addr=EMAIL_USERNAME, to_addrs=receiver,
+                               msg=email_text)
+    print(senderss)
     server.close()
-
-if __name__ == '__main__':
-    send_email("ali@sifirbir.xyz", "ne haber")
-
-    while True:
-        job = r.rpop(job_queue)
-        new_email = json.loads(job)
-        try:
-            send_email(new_email['to'], "\n".join(new_email["stars"]))
-        except:
-            r.lpush(job)
-
-        time.sleep(10)

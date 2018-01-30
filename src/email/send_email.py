@@ -1,15 +1,23 @@
-from email_service import send_email
-import redis, logging
+import redis
+import logging
+import os
 
-r = redis.Redis()
+from ulduz.email.email_service import send_email
+from ulduz.constants import EMAIL_SERVICE_QUEUE
+
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 logger = logging.ERROR
-EMAIL_QUEUE= "email_queue"
+EMAIL_QUEUE = EMAIL_SERVICE_QUEUE
+
 
 def listen_redis(block=True, timeout=None):
     if block:
-        item = r.blpop(EMAIL_QUEUE, timeout=timeout)
+        item = r.brpop(EMAIL_QUEUE, timeout=timeout)
     else:
-        item = r.lpop(EMAIL_QUEUE)
+        item = r.rpop(EMAIL_QUEUE)
 
     if item:
         item = item[1]
@@ -23,11 +31,10 @@ def create_email_body(repo):
     return repo_message
 
 
-
 if __name__ == '__main__':
     email = listen_redis()
     if type(email) == dict:
-        email_body= "************** Git Star Reminder ********************\n"
+        email_body = "************** Git Star Reminder ********************\n"
         for repo in email['repos']:
             email_body += create_email_body(repo)
         email_body += "******************* The End **********************\n"
