@@ -11,7 +11,7 @@ import redis
 import os
 import re
 import json
-
+import constants
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,7 +28,7 @@ try:
     API_URL = os.environ['REST_API_URL']
 except KeyError:
     logger.error("KeyError: Error while getting environment variables. Did you set them correctly?")
-    raise KeyError
+    exit(-1)
 
 class Bot:
     def __init__(self, token):
@@ -155,7 +155,7 @@ def run_job_queue(bot):
         redix = redis.Redis()
         while True:
             # get job from redis
-            _, job = redix.brpop("telegram_queue")
+            _, job = redix.brpop(constants.TELEGRAM_WORKER_QUEUE)
             job = json.loads(job)
             message = "Hello this is your periodic star reminder and these are the lucky repos:\n"
             for repo in job["repos"]:
@@ -168,13 +168,11 @@ def run_job_queue(bot):
             except error.Unauthorized as e:
                 logger.error("{}, UserID: {}".format(e, job["to"]))
             # report job done.
-            time.sleep(0.5)
     except KeyboardInterrupt:
         raise KeyboardInterrupt
 
 
 def send_post(user_data):
-    print(user_data)
     r = requests.post(API_URL, data=json.dumps(user_data), headers={"content-type": "application/json"})
 
 def main():
