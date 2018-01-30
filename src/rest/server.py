@@ -2,10 +2,21 @@ import falcon
 import json
 import redis
 import pika
+import os
 
 from graceful.serializers import BaseSerializer
 from graceful.fields import StringField, BaseField, IntField
-from graceful.resources.generic import RetrieveAPI, ListCreateAPI
+from graceful.resources.generic import ListCreateAPI
+
+RABBIT_HOST = os.getenv('RABBIT_HOST')
+RABBIT_PORT = os.getenv('RABBIT_PORT', 5672)
+VIRTUAL_HOST = os.getenv('VIRTUAL_HOST')
+RABBIT_USER = os.getenv('RABBIT_USER')
+RABBIT_PASSWORD = os.getenv('RABBIT_PASSWORD')
+
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+
 
 api = application = falcon.API()
 QUEUE_NAME = "scheduler_queue"
@@ -35,13 +46,15 @@ class SubscriptionList(ListCreateAPI, with_context=True):
     """
     def __init__(self):
         super(SubscriptionList, self).__init__()
-        self.redis_client = redis.Redis()
+        self.redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
         connection = pika.BlockingConnection(
-        pika.ConnectionParameters(
-            host='10.21.251.26', 
-            virtual_host='ab18-vhost',
-            credentials=pika.PlainCredentials('ab18-user', 'microservices')))
-    
+            pika.ConnectionParameters(
+                host=RABBIT_HOST,
+                virtual_host=VIRTUAL_HOST,
+                credentials=pika.PlainCredentials(RABBIT_USER, RABBIT_PASSWORD)
+            )
+        )
+
         self.channel = connection.channel()
 
         self.channel.queue_declare(queue=QUEUE_NAME, durable=True)
