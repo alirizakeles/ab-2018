@@ -48,11 +48,13 @@ class SubscriptionList(ListCreateAPI, with_context=True):
         super(SubscriptionList, self).__init__()
         self.redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
         connection = pika.BlockingConnection(
-        pika.ConnectionParameters(
-            host=RABBIT_HOST,
-            virtual_host=VIRTUAL_HOST,
-            credentials=pika.PlainCredentials(RABBIT_USER, RABBIT_PASSWORD)))
-    
+            pika.ConnectionParameters(
+                host=RABBIT_HOST,
+                virtual_host=VIRTUAL_HOST,
+                credentials=pika.PlainCredentials(RABBIT_USER, RABBIT_PASSWORD)
+            )
+        )
+
         self.channel = connection.channel()
 
         self.channel.queue_declare(queue=QUEUE_NAME)
