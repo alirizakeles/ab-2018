@@ -12,6 +12,10 @@ import re
 import json
 import constants
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -151,7 +155,7 @@ class Bot:
 
 def run_job_queue(bot):
     try:
-        redix = redis.Redis()
+        redix = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
         while True:
             # get job from redis
             _, job = redix.brpop(constants.TELEGRAM_WORKER_QUEUE)
