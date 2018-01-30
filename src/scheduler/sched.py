@@ -13,8 +13,11 @@ VIRTUAL_HOST = os.getenv('VIRTUAL_HOST')
 RABBIT_USER = os.getenv('RABBIT_USER')
 RABBIT_PASSWORD = os.getenv('RABBIT_PASSWORD')
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
 
-r = redis.Redis()
+
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 p = pika.BlockingConnection(
     pika.ConnectionParameters(
         host=RABBIT_HOST,
