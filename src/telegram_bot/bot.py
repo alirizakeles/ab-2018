@@ -23,8 +23,12 @@ ALLOWED_PERIODS = ["daily", "weekly", "monthly"]
 try:
     TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 
-    # Expeected: http://address_to_api/v#/Subscriptions/
+    # Expected: http://address_to_api/v#/Subscriptions/
     API_URL = os.environ['REST_API_URL']
+
+    # Variables for Redis server:
+    REDIS_SERVER_URL = os.environ['REDIS_SERVER_URL']
+
 except KeyError:
     logger.error("KeyError: Error while getting environment variables. Did you set them correctly?")
     exit(-1)
@@ -151,7 +155,7 @@ class Bot:
 
 def run_job_queue(bot):
     try:
-        redix = redis.Redis()
+        redix = redis.Redis(host=REDIS_SERVER_URL)
         while True:
             # get job from redis
             _, job = redix.brpop(TELEGRAM_WORKER_QUEUE)
