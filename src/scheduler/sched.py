@@ -39,7 +39,7 @@ def user_callback(ch, method, properties, body):
     user_json = body.decode()
     user_dict = json.loads(user_json)
 
-    r.set("User:{}".format(user_dict["email"]), json.dumps(user_json))
+    r.set("User:{}".format(user_dict["email"]), user_json)
 
     schedule.every(periods[user_dict['period']]).days.at("10:00").do(
         sub_ch.basic_publish, exchange='work',
