@@ -57,7 +57,7 @@ class SubscriptionList(ListCreateAPI, with_context=True):
 
         self.channel = connection.channel()
 
-        self.channel.queue_declare(queue=QUEUE_NAME, durable=True)
+        self.channel.queue_declare(queue=QUEUE_NAME)
     
         
     serializer = SubscriptionSerializer()
