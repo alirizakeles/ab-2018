@@ -6,15 +6,11 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, Rege
                           ConversationHandler)
 import requests
 import logging
-<<<<<<< HEAD
-import time
-=======
->>>>>>> 1ef4b9aaf963ea8afb57097c0baa5e36b4e92ff3
 import redis
 import os
 import re
 import json
-import constants
+from ulduz.constants import TELEGRAM_WORKER_QUEUE
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -158,7 +154,7 @@ def run_job_queue(bot):
         redix = redis.Redis()
         while True:
             # get job from redis
-            _, job = redix.brpop(constants.TELEGRAM_WORKER_QUEUE)
+            _, job = redix.brpop(TELEGRAM_WORKER_QUEUE)
             job = json.loads(job)
             message = "Hello this is your periodic star reminder and these are the lucky repos:\n"
             for repo in job["repos"]:
